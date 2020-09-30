@@ -50,8 +50,8 @@ resource "aws_rds_cluster" "primary" {
   database_name                       = var.db_name
   master_username                     = var.admin_user
   master_password                     = var.admin_password
-  backup_retention_period             = var.retention_period
-  preferred_backup_window             = var.backup_window
+  //backup_retention_period             = var.retention_period
+  //preferred_backup_window             = var.backup_window
   copy_tags_to_snapshot               = var.copy_tags_to_snapshot
   final_snapshot_identifier           = var.cluster_identifier == "" ? lower(module.this.id) : lower(var.cluster_identifier)
   skip_final_snapshot                 = var.skip_final_snapshot
@@ -61,7 +61,7 @@ resource "aws_rds_cluster" "primary" {
   source_region                       = var.source_region
   snapshot_identifier                 = var.snapshot_identifier
   vpc_security_group_ids              = compact(flatten([join("", aws_security_group.default.*.id), var.vpc_security_group_ids]))
-  preferred_maintenance_window        = var.maintenance_window
+  //preferred_maintenance_window        = var.maintenance_window
   db_subnet_group_name                = join("", aws_db_subnet_group.default.*.name)
   db_cluster_parameter_group_name     = join("", aws_rds_cluster_parameter_group.default.*.name)
   iam_database_authentication_enabled = var.iam_database_authentication_enabled
@@ -116,8 +116,8 @@ resource "aws_rds_cluster" "secondary" {
   database_name                       = var.db_name
   master_username                     = var.admin_user
   master_password                     = var.admin_password
-  backup_retention_period             = var.retention_period
-  preferred_backup_window             = var.backup_window
+  //backup_retention_period             = var.retention_period
+  //preferred_backup_window             = var.backup_window
   copy_tags_to_snapshot               = var.copy_tags_to_snapshot
   final_snapshot_identifier           = var.cluster_identifier == "" ? lower(module.this.id) : lower(var.cluster_identifier)
   skip_final_snapshot                 = var.skip_final_snapshot
@@ -127,7 +127,7 @@ resource "aws_rds_cluster" "secondary" {
   source_region                       = var.source_region
   snapshot_identifier                 = var.snapshot_identifier
   vpc_security_group_ids              = compact(flatten([join("", aws_security_group.default.*.id), var.vpc_security_group_ids]))
-  preferred_maintenance_window        = var.maintenance_window
+  //preferred_maintenance_window        = var.maintenance_window
   db_subnet_group_name                = join("", aws_db_subnet_group.default.*.name)
   db_cluster_parameter_group_name     = join("", aws_rds_cluster_parameter_group.default.*.name)
   iam_database_authentication_enabled = var.iam_database_authentication_enabled
