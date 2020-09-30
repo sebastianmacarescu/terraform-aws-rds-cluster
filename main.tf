@@ -3,6 +3,20 @@ locals {
   is_primary_cluster     = var.global_cluster_identifier == null || var.global_cluster_identifier == "" ? true : false
 }
 
+data "aws_ssm_parameter" "admin_user" {
+  count           = var.admin_user_ssm_path != null ? 1 : 0
+  name            = var.admin_user_ssm_path
+  with_decryption = true
+}
+
+data "aws_ssm_parameter" "admin_password" {
+  count           = var.admin_password_ssm_path != null ? 1 : 0
+  name            = var.admin_password_ssm_path
+  with_decryption = true
+}
+
+
+
 resource "aws_security_group" "default" {
   count       = module.this.enabled ? 1 : 0
   name        = module.this.id
@@ -48,8 +62,8 @@ resource "aws_rds_cluster" "primary" {
   count                               = module.this.enabled && local.is_primary_cluster == true ? 1 : 0
   cluster_identifier                  = var.cluster_identifier == "" ? module.this.id : var.cluster_identifier
   database_name                       = var.db_name
-  master_username                     = var.admin_user
-  master_password                     = var.admin_password
+  master_username                     = var.admin_user_ssm_path != null ? join("", data.aws_ssm_parameter.admin_user.*.value) : var.admin_user
+  master_password                     = var.admin_password_ssm_path != null ? join("", data.aws_ssm_parameter.admin_password.*.value) : var.admin_password
   //backup_retention_period             = var.retention_period
   //preferred_backup_window             = var.backup_window
   copy_tags_to_snapshot               = var.copy_tags_to_snapshot
@@ -114,8 +128,8 @@ resource "aws_rds_cluster" "secondary" {
   count                               = module.this.enabled && local.is_primary_cluster == false ? 1 : 0
   cluster_identifier                  = var.cluster_identifier == "" ? module.this.id : var.cluster_identifier
   database_name                       = var.db_name
-  master_username                     = var.admin_user
-  master_password                     = var.admin_password
+  master_username                     = var.admin_user_ssm_path != null ? join("", data.aws_ssm_parameter.admin_user.*.value) : var.admin_user
+  master_password                     = var.admin_password_ssm_path != null ? join("", data.aws_ssm_parameter.admin_password.*.value) : var.admin_password
   //backup_retention_period             = var.retention_period
   //preferred_backup_window             = var.backup_window
   copy_tags_to_snapshot               = var.copy_tags_to_snapshot

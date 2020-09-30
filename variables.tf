@@ -62,10 +62,22 @@ variable "admin_user" {
   description = "(Required unless a snapshot_identifier is provided) Username for the master DB user"
 }
 
+variable "admin_user_ssm_path" {
+  type        = string
+  default     = null
+  description = "(Required unless a snapshot_identifier is provided) Username SSM Path for the master DB user"
+}
+
 variable "admin_password" {
   type        = string
   default     = ""
   description = "(Required unless a snapshot_identifier is provided) Password for the master DB user"
+}
+
+variable "admin_password_ssm_path" {
+  type        = string
+  default     = null
+  description = "(Required unless a snapshot_identifier is provided) Password SSM Path for the master DB user"
 }
 
 variable "retention_period" {
