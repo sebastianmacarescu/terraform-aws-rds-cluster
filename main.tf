@@ -70,7 +70,7 @@ resource "aws_rds_cluster" "primary" {
   final_snapshot_identifier           = var.cluster_identifier == "" ? lower(module.this.id) : lower(var.cluster_identifier)
   skip_final_snapshot                 = var.skip_final_snapshot
   apply_immediately                   = var.apply_immediately
-  storage_encrypted                   = var.storage_encrypted
+  storage_encrypted                   = var.engine_mode == "serverless" ? null : var.storage_encrypted
   kms_key_id                          = var.kms_key_arn
   source_region                       = var.source_region
   snapshot_identifier                 = var.snapshot_identifier
@@ -115,6 +115,15 @@ resource "aws_rds_cluster" "primary" {
       create = lookup(timeouts.value, "create", "120m")
       update = lookup(timeouts.value, "update", "120m")
       delete = lookup(timeouts.value, "delete", "120m")
+    }
+  }
+
+  dynamic "restore_to_point_in_time" {
+    for_each = var.restore_to_point_in_time
+    content {
+      source_cluster_identifier  = lookup(restore_to_point_in_time.value, "source_cluster_identifier", "120m")
+      restore_type               = lookup(restore_to_point_in_time.value, "restore_type", "copy-on-write")
+      use_latest_restorable_time = lookup(restore_to_point_in_time.value, "use_latest_restorable_time", true)
     }
   }
 
@@ -261,7 +270,8 @@ locals {
 }
 
 module "dns_master" {
-  source = "git::https://github.com/cloudposse/terraform-aws-route53-cluster-hostname.git?ref=tags/0.7.0"
+  source  = "cloudposse/route53-cluster-hostname/aws"
+  version = "0.8.0"
 
   enabled  = module.this.enabled && length(var.zone_id) > 0 ? true : false
   dns_name = local.cluster_dns_name
@@ -272,7 +282,8 @@ module "dns_master" {
 }
 
 module "dns_replicas" {
-  source = "git::https://github.com/cloudposse/terraform-aws-route53-cluster-hostname.git?ref=tags/0.7.0"
+  source  = "cloudposse/route53-cluster-hostname/aws"
+  version = "0.8.0"
 
   enabled  = module.this.enabled && length(var.zone_id) > 0 && var.engine_mode != "serverless" ? true : false
   dns_name = local.reader_dns_name
